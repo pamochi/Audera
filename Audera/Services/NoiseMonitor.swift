@@ -24,7 +24,7 @@ final class NoiseMonitor: NSObject, ObservableObject {
 
     private static let backgroundTaskIdentifier = "com.audera.noise.refresh"
 
-    struct Scheduler: NoiseMonitorScheduling {
+    final class Scheduler: NoiseMonitorScheduling {
         func registerBackgroundTasks() {
             BGTaskScheduler.shared.register(forTaskWithIdentifier: NoiseMonitor.backgroundTaskIdentifier, using: nil) { task in
                 guard let refreshTask = task as? BGAppRefreshTask else {
@@ -62,6 +62,7 @@ final class NoiseMonitor: NSObject, ObservableObject {
     private var isSessionConfigured = false
     private var isMonitoring = false
 
+    @MainActor
     init(dataController: NoiseDataController,
          configuration: NoiseAnalytics.Configuration = .default,
          scheduler: NoiseMonitorScheduling = Scheduler()) {
@@ -204,7 +205,7 @@ final class NoiseMonitor: NSObject, ObservableObject {
     }
 
     private func prepareRecorderIfNeeded() async throws {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             processingQueue.async { [weak self] in
                 guard let self else {
                     continuation.resume(throwing: MonitorError.recorderUnavailable)
@@ -224,7 +225,7 @@ final class NoiseMonitor: NSObject, ObservableObject {
                         self.recorder?.isMeteringEnabled = true
                         self.recorder?.record()
                     }
-                    continuation.resume()
+                    continuation.resume(returning: ())
                 } catch {
                     continuation.resume(throwing: error)
                 }
