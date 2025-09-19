@@ -87,19 +87,33 @@ struct DashboardView: View {
             }
 
             if viewModel.hasSamples {
-                Chart(viewModel.timelinePoints) { point in
-                    LineMark(
-                        x: .value("Time", point.date),
-                        y: .value("dB", point.averageDecibel)
-                    )
-                    .foregroundStyle(.blue)
-                    .interpolationMethod(.catmullRom)
+                Chart {
+                    ForEach(viewModel.timelinePoints) { point in
+                        LineMark(
+                            x: .value("Time", point.date),
+                            y: .value("dB", point.averageDecibel)
+                        )
+                        .foregroundStyle(.blue)
+                        .interpolationMethod(.catmullRom)
 
-                    AreaMark(
-                        x: .value("Time", point.date),
-                        y: .value("dB", point.averageDecibel)
-                    )
-                    .foregroundStyle(.blue.opacity(0.2))
+                        AreaMark(
+                            x: .value("Time", point.date),
+                            y: .value("dB", point.averageDecibel)
+                        )
+                        .foregroundStyle(.blue.opacity(0.2))
+                    }
+
+                    RuleMark(y: .value("Quiet", 40))
+                        .foregroundStyle(Color.green.opacity(0.6))
+                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
+
+                    RuleMark(y: .value("Moderate", 70))
+                        .foregroundStyle(Color.orange.opacity(0.6))
+                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
+
+                    RuleMark(y: .value("Loud", 85))
+                        .foregroundStyle(Color.red.opacity(0.6))
+                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
                 }
                 .chartYScale(domain: 0...100)
                 .chartYAxisLabel("dB")
@@ -114,13 +128,40 @@ struct DashboardView: View {
                         }
                     }
                 }
-                .chartBackground { _ in
-                    RuleMark(y: .value("Quiet", 40))
-                        .foregroundStyle(Color.green.opacity(0.25))
-                    RuleMark(y: .value("Moderate", 70))
-                        .foregroundStyle(Color.orange.opacity(0.25))
-                    RuleMark(y: .value("Loud", 85))
-                        .foregroundStyle(Color.red.opacity(0.25))
+                .chartBackground { proxy in
+                    GeometryReader { geometry in
+                        let plotFrame = proxy.plotAreaFrame(in: geometry)
+
+                        ZStack(alignment: .topLeading) {
+                            Color.clear
+
+                            if plotFrame != .null,
+                               let quietBottom = proxy.position(forY: 0, in: geometry),
+                               let quietTop = proxy.position(forY: 40, in: geometry),
+                               let moderateTop = proxy.position(forY: 70, in: geometry),
+                               let loudTop = proxy.position(forY: 85, in: geometry) {
+
+                                let quietHeight = max(0, quietBottom - quietTop)
+                                let moderateHeight = max(0, quietTop - moderateTop)
+                                let loudHeight = max(0, moderateTop - loudTop)
+
+                                Rectangle()
+                                    .fill(Color.green.opacity(0.1))
+                                    .frame(width: plotFrame.width, height: quietHeight)
+                                    .offset(x: plotFrame.minX, y: quietTop)
+
+                                Rectangle()
+                                    .fill(Color.orange.opacity(0.08))
+                                    .frame(width: plotFrame.width, height: moderateHeight)
+                                    .offset(x: plotFrame.minX, y: moderateTop)
+
+                                Rectangle()
+                                    .fill(Color.red.opacity(0.06))
+                                    .frame(width: plotFrame.width, height: loudHeight)
+                                    .offset(x: plotFrame.minX, y: loudTop)
+                            }
+                        }
+                    }
                 }
                 .frame(height: 240)
             } else {
