@@ -137,10 +137,10 @@ struct DashboardView: View {
                                 let plotFrame = geometry[plotAreaAnchor]
 
                                 if plotFrame != .null,
-                                   let quietBottom = proxy.position(forY: 0, in: geometry),
-                                   let quietTop = proxy.position(forY: 40, in: geometry),
-                                   let moderateTop = proxy.position(forY: 70, in: geometry),
-                                   let loudTop = proxy.position(forY: 85, in: geometry) {
+                                   let quietBottom = proxy.position(forY: 0, in: plotFrame),
+                                   let quietTop = proxy.position(forY: 40, in: plotFrame),
+                                   let moderateTop = proxy.position(forY: 70, in: plotFrame),
+                                   let loudTop = proxy.position(forY: 85, in: plotFrame) {
 
                                     let quietHeight = max(0, quietBottom - quietTop)
                                     let moderateHeight = max(0, quietTop - moderateTop)
@@ -149,17 +149,17 @@ struct DashboardView: View {
                                     Rectangle()
                                         .fill(Color.green.opacity(0.1))
                                         .frame(width: plotFrame.width, height: quietHeight)
-                                        .offset(x: plotFrame.minX, y: quietTop)
+                                        .offset(x: plotFrame.minX, y: plotFrame.minY + quietTop)
 
                                     Rectangle()
                                         .fill(Color.orange.opacity(0.08))
                                         .frame(width: plotFrame.width, height: moderateHeight)
-                                        .offset(x: plotFrame.minX, y: moderateTop)
+                                        .offset(x: plotFrame.minX, y: plotFrame.minY + moderateTop)
 
                                     Rectangle()
                                         .fill(Color.red.opacity(0.06))
                                         .frame(width: plotFrame.width, height: loudHeight)
-                                        .offset(x: plotFrame.minX, y: loudTop)
+                                        .offset(x: plotFrame.minX, y: plotFrame.minY + loudTop)
                                 }
                             }
                         }
