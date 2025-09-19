@@ -130,35 +130,37 @@ struct DashboardView: View {
                 }
                 .chartBackground { proxy in
                     GeometryReader { geometry in
-                        let plotFrame = proxy.plotAreaFrame(in: geometry)
-
                         ZStack(alignment: .topLeading) {
                             Color.clear
 
-                            if plotFrame != .null,
-                               let quietBottom = proxy.position(forY: 0, in: geometry),
-                               let quietTop = proxy.position(forY: 40, in: geometry),
-                               let moderateTop = proxy.position(forY: 70, in: geometry),
-                               let loudTop = proxy.position(forY: 85, in: geometry) {
+                            if let plotAreaAnchor = proxy.plotAreaFrame {
+                                let plotFrame = geometry[plotAreaAnchor]
 
-                                let quietHeight = max(0, quietBottom - quietTop)
-                                let moderateHeight = max(0, quietTop - moderateTop)
-                                let loudHeight = max(0, moderateTop - loudTop)
+                                if plotFrame != .null,
+                                   let quietBottom = proxy.position(forY: 0, in: geometry),
+                                   let quietTop = proxy.position(forY: 40, in: geometry),
+                                   let moderateTop = proxy.position(forY: 70, in: geometry),
+                                   let loudTop = proxy.position(forY: 85, in: geometry) {
 
-                                Rectangle()
-                                    .fill(Color.green.opacity(0.1))
-                                    .frame(width: plotFrame.width, height: quietHeight)
-                                    .offset(x: plotFrame.minX, y: quietTop)
+                                    let quietHeight = max(0, quietBottom - quietTop)
+                                    let moderateHeight = max(0, quietTop - moderateTop)
+                                    let loudHeight = max(0, moderateTop - loudTop)
 
-                                Rectangle()
-                                    .fill(Color.orange.opacity(0.08))
-                                    .frame(width: plotFrame.width, height: moderateHeight)
-                                    .offset(x: plotFrame.minX, y: moderateTop)
+                                    Rectangle()
+                                        .fill(Color.green.opacity(0.1))
+                                        .frame(width: plotFrame.width, height: quietHeight)
+                                        .offset(x: plotFrame.minX, y: quietTop)
 
-                                Rectangle()
-                                    .fill(Color.red.opacity(0.06))
-                                    .frame(width: plotFrame.width, height: loudHeight)
-                                    .offset(x: plotFrame.minX, y: loudTop)
+                                    Rectangle()
+                                        .fill(Color.orange.opacity(0.08))
+                                        .frame(width: plotFrame.width, height: moderateHeight)
+                                        .offset(x: plotFrame.minX, y: moderateTop)
+
+                                    Rectangle()
+                                        .fill(Color.red.opacity(0.06))
+                                        .frame(width: plotFrame.width, height: loudHeight)
+                                        .offset(x: plotFrame.minX, y: loudTop)
+                                }
                             }
                         }
                     }
