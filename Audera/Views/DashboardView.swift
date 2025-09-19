@@ -108,9 +108,9 @@ struct DashboardView: View {
                 }
                 .chartXAxis {
                     AxisMarks(values: .stride(by: .hour, count: 3)) { value in
-                        if let date = value.as(Date.self) {
+                        if value.as(Date.self) != nil {
                             AxisGridLine()
-                            AxisValueLabel(date, format: .dateTime.hour(.defaultDigits(amPM: .abbreviated)))
+                            AxisValueLabel(format: .dateTime.hour(.defaultDigits(amPM: .abbreviated)))
                         }
                     }
                 }
