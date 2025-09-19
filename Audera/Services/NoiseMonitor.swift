@@ -64,13 +64,22 @@ final class NoiseMonitor: NSObject, ObservableObject {
 
     @MainActor
     init(dataController: NoiseDataController,
-         configuration: NoiseAnalytics.Configuration = .default,
-         scheduler: NoiseMonitorScheduling = Scheduler()) {
+         configuration: NoiseAnalytics.Configuration,
+         scheduler: NoiseMonitorScheduling) {
         self.dataController = dataController
         self.configuration = configuration
         self.scheduler = scheduler
         super.init()
         NoiseMonitor.shared = self
+    }
+
+    @MainActor
+    convenience init(dataController: NoiseDataController) {
+        let configuration = NoiseAnalytics.Configuration.default
+        let scheduler = Scheduler()
+        self.init(dataController: dataController,
+                  configuration: configuration,
+                  scheduler: scheduler)
     }
 
     // MARK: - Lifecycle

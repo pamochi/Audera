@@ -18,7 +18,9 @@ final class AppEnvironment: ObservableObject {
     init(container: ModelContainer) {
         analytics = NoiseAnalytics()
         dataController = NoiseDataController(container: container, analytics: analytics)
-        noiseMonitor = NoiseMonitor(dataController: dataController, configuration: analytics.configuration)
+        noiseMonitor = NoiseMonitor(dataController: dataController,
+                                    configuration: analytics.configuration,
+                                    scheduler: NoiseMonitor.Scheduler())
         do {
             try dataController.updateSummary(for: Date())
         } catch {
